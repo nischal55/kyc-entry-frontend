@@ -1,9 +1,11 @@
-<script>
+<script setup>
+import { ref, onMounted } from 'vue';
+import ConfirmDialog from 'primevue/confirmdialog';
 
 </script>
 
-
-
 <template>
-  <p class="text-5xl">hello</p>
+  <div>
+    <router-view />
+  </div>
 </template>
