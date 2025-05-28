@@ -8,11 +8,13 @@ import 'primeicons/primeicons.css'
 import Button from "primevue/button"
 import InputNumber from 'primevue/inputnumber';
 import InputText from 'primevue/inputtext';
+import ToastService from 'primevue/toastservice';
 
 const app = createApp(App);
 app.component('Button', Button);
 app.component('InputNumber', InputNumber)
 app.component('InputText', InputText)
+app.use(ToastService);
 
 app.use(router)
 app.use(PrimeVue, {
