@@ -1,4 +1,3 @@
-// src/stores/kycForm.js
 import { defineStore } from 'pinia'
 
 export const useKycFormStore = defineStore('kycForm', {
