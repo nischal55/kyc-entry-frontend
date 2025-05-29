@@ -130,7 +130,7 @@ const submitForm = () => {
     resetErrors();
     let hasError = false;
 
-    const requiredFields = ['fatherName', 'motherName', 'grandFatherName', 'grandMotherName', 'married'];
+    const requiredFields = ['fatherName', 'motherName', 'grandFatherName', 'grandMotherName'];
     requiredFields.forEach(field => {
         if (!validateField(field, form.value[field])) {
             hasError = true;
@@ -138,10 +138,10 @@ const submitForm = () => {
     });
 
     // Validate marital status
-    if (form.value.married === null) {
-        errors.value.married = true;
-        hasError = true;
-    }
+    // if (form.value.married === null) {
+    //     errors.value.married = true;
+    //     hasError = true;
+    // }
 
     // If married, validate additional fields
     if (form.value.married) {
