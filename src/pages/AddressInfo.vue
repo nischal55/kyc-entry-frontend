@@ -116,48 +116,6 @@
               {{ errorMessages.permanent.houseNo }}
             </small>
           </div>
-
-          <!-- Mobile No (Permanent) -->
-          <div>
-            <label>Mobile No <span class="text-red-500">*</span></label><br />
-            <InputNumber
-              class="w-full border border-slate-300 rounded-md h-10"
-              :class="{ 'border-red-500': errors.permanent.mobile }"
-              v-model="form.permanent.mobile"
-              :useGrouping="false"
-            />
-            <small v-if="errors.permanent.mobile" class="text-red-500 text-sm">
-              {{ errorMessages.permanent.mobile }}
-            </small>
-          </div>
-
-          <!-- Phone No (Permanent, optional) -->
-          <div>
-            <label>Phone No</label><br />
-            <InputNumber
-              class="w-full border border-slate-300 rounded-md h-10"
-              :class="{ 'border-red-500': errors.permanent.phone }"
-              v-model="form.permanent.phone"
-              :useGrouping="false"
-            />
-            <small v-if="errors.permanent.phone" class="text-red-500 text-sm">
-              {{ errorMessages.permanent.phone }}
-            </small>
-          </div>
-
-          <!-- Email (Permanent) -->
-          <div>
-            <label>Email <span class="text-red-500">*</span></label><br />
-            <InputText
-              class="w-full border border-slate-300 rounded-md h-10"
-              :class="{ 'border-red-500': errors.permanent.email }"
-              type="email"
-              v-model="form.permanent.email"
-            />
-            <small v-if="errors.permanent.email" class="text-red-500 text-sm">
-              {{ errorMessages.permanent.email }}
-            </small>
-          </div>
         </div>
 
         <!-- ─── Checkbox: Same as Permanent? ──── -->
@@ -292,53 +250,7 @@
               {{ errorMessages.temporary.houseNo }}
             </small>
           </div>
-
-          <!-- Mobile (Temporary) -->
-          <div>
-            <label>Mobile <span class="text-red-500">*</span></label><br />
-            <InputNumber
-              class="w-full border border-slate-300 rounded-md h-10"
-              :class="{ 'border-red-500': errors.temporary.mobile }"
-              v-model="form.temporary.mobile"
-              :useGrouping="false"
-              :disabled="sameAsPermanentComputed"
-            />
-            <small v-if="errors.temporary.mobile" class="text-red-500 text-sm">
-              {{ errorMessages.temporary.mobile }}
-            </small>
-          </div>
-
-          <!-- Phone (Temporary, optional) -->
-          <div>
-            <label>Phone</label><br />
-            <InputNumber
-              class="w-full border border-slate-300 rounded-md h-10"
-              :class="{ 'border-red-500': errors.temporary.phone }"
-              v-model="form.temporary.phone"
-              :useGrouping="false"
-              :disabled="sameAsPermanentComputed"
-            />
-            <small v-if="errors.temporary.phone" class="text-red-500 text-sm">
-              {{ errorMessages.temporary.phone }}
-            </small>
-          </div>
-
-          <!-- Email (Temporary) -->
-          <div>
-            <label>Email <span class="text-red-500">*</span></label><br />
-            <InputText
-              class="w-full border border-slate-300 rounded-md h-10"
-              :class="{ 'border-red-500': errors.temporary.email }"
-              type="email"
-              v-model="form.temporary.email"
-              :disabled="sameAsPermanentComputed"
-            />
-            <small v-if="errors.temporary.email" class="text-red-500 text-sm">
-              {{ errorMessages.temporary.email }}
-            </small>
-          </div>
         </div>
-
                 <div class="flex justify-end pt-4">
                     <Button label="Next" class="w-40" @click="submitForm" />
                 </div>
@@ -356,7 +268,7 @@ import Button from 'primevue/button';
 import Toast from 'primevue/toast';
 import { useToast } from 'primevue/usetoast';
 import { useRouter } from 'vue-router';
-import { useKycFormStore } from '@/stores/kycForm';
+import { useKycFormStore } from '@/stores/addressStore';
 
 
 const toast = useToast();
@@ -379,9 +291,6 @@ const errors = reactive({
         wardNo: false,
         tole: false,
         houseNo: false,
-        phone: false,
-        mobile: false,
-        email: false
     },
     temporary: {
         country: false,
@@ -391,9 +300,6 @@ const errors = reactive({
         wardNo: false,
         tole: false,
         houseNo: false,
-        phone: false,
-        mobile: false,
-        email: false
     }
 });
 
@@ -406,9 +312,6 @@ const errorMessages = reactive({
         wardNo: '',
         tole: '',
         houseNo: '',
-        phone: '',
-        mobile: '',
-        email: ''
     },
     temporary: {
         country: '',
@@ -418,9 +321,6 @@ const errorMessages = reactive({
         wardNo: '',
         tole: '',
         houseNo: '',
-        phone: '',
-        mobile: '',
-        email: ''
     }
 });
 
@@ -456,13 +356,6 @@ function resetErrors() {
             errors[section][field] = false;
             errorMessages[section][field] = '';
         }
-    }
-}
-
-function clearTemporaryErrors() {
-    for (const field in errors.temporary) {
-        errors.temporary[field] = false;
-        errorMessages.temporary[field] = '';
     }
 }
 
@@ -555,36 +448,6 @@ function validateSection(sectionName) {
         e.houseNo = true;
         em.houseNo = 'If provided, House No must be a positive integer.';
         showErrorToast('If provided, House No must be a positive integer.');
-        hasError = true;
-    }
-
-    const mobileStr = f.mobile != null ? f.mobile.toString() : '';
-    if (!mobileStr || mobileStr.length !== 10 || !/^\d{10}$/.test(mobileStr)) {
-        e.mobile = true;
-        em.mobile = 'Mobile number must be exactly 10 digits.';
-        showErrorToast('Mobile number must be exactly 10 digits.');
-        hasError = true;
-    }
-
-    if (f.phone !== null && f.phone !== '') {
-        const phoneStr = f.phone.toString();
-        if (phoneStr.length !== 7 || !/^\d{7}$/.test(phoneStr)) {
-            e.phone = true;
-            em.phone = 'Phone number must be exactly 7 digits.';
-            showErrorToast('Phone number must be exactly 7 digits.');
-            hasError = true;
-        }
-    }
-
-    if (!f.email) {
-        e.email = true;
-        em.email = 'Email is required.';
-        showErrorToast('Email is required.');
-        hasError = true;
-    } else if (!isValidEmail(f.email)) {
-        e.email = true;
-        em.email = 'Please enter a valid email address.';
-        showErrorToast('Please enter a valid email address.');
         hasError = true;
     }
     return true;
