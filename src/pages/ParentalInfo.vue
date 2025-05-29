@@ -1,53 +1,45 @@
 <template>
     <Toast />
     <div class="flex justify-center">
-        <div class="w-[60%] h-[35rem] mt-10 shadow-md bg-white rounded-md">
+        <div class="w-[60%] h-[30rem] mt-10 shadow-md bg-white rounded-md">
             <div class="p-10">
-                <p class="text-blue-800 font-bold text-xl">Personal Informations</p>
+                <p class="text-blue-800 font-bold text-xl">Family Informations</p>
                 <div class="grid grid-cols-2 gap-5 py-10">
                     <div>
-                        <label>First Name</label><br />
+                        <label>Father's Name</label><br />
                         <InputText class="w-full border border-slate-300 rounded-md h-10"
                             :class="{ 'border-red-500': errors.firstName }" v-model="form.firstName"
                             @input="e => form.firstName = e.target.value.replace(/[^a-zA-Z]/g, '')" />
                     </div>
                     <div>
-                        <label>Middle Name</label><br />
+                        <label>Mother's Name</label><br />
                         <InputText class="w-full border border-slate-300 rounded-md h-10"
                             :class="{ 'border-red-500': errors.middleName }" v-model="form.middleName"
                             @input="e => form.middleName = e.target.value.replace(/[^a-zA-Z]/g, '')" />
                     </div>
                     <div>
-                        <label>Last Name</label><br />
+                        <label>GrandFather's Name</label><br />
                         <InputText class="w-full border border-slate-300 rounded-md h-10"
                             :class="{ 'border-red-500': errors.lastName }" v-model="form.lastName"
                             @input="e => form.lastName = e.target.value.replace(/[^a-zA-Z]/g, '')" />
                     </div>
                     <div>
-                        <label>Date of Birth</label><br />
-                        <DatePicker class="w-full border border-slate-200 rounded-md h-10"
-                            :class="{ 'border-red-500': errors.dob }" v-model="form.dob" />
-                    </div>
-                    <div>
-                        <label>Gender</label><br />
-                        <Dropdown class="w-full border border-slate-200 rounded-md h-10"
-                            :class="{ 'border-red-500': errors.gender }" v-model="form.gender" :options="genderOptions"
-                            optionLabel="name" placeholder="Select Gender" />
-                    </div>
-                    <div>
-                        <label>Mobile No</label><br />
-                        <InputNumber class="w-full border border-slate-200 rounded-md h-10"
-                            :class="{ 'border-red-500': errors.mobile }" v-model="form.mobile" :useGrouping="false" />
-                    </div>
-                    <div>
-                        <label>Phone No</label><br />
-                        <InputNumber class="w-full border border-slate-200 rounded-md h-10"
-                            :class="{ 'border-red-500': errors.phone }" v-model="form.phone" :useGrouping="false" />
-                    </div>
-                    <div>
-                        <label>Email</label><br />
+                        <label>GrandMother's Name</label><br />
                         <InputText class="w-full border border-slate-300 rounded-md h-10"
-                            :class="{ 'border-red-500': errors.email }" type="email" v-model="form.email" />
+                            :class="{ 'border-red-500': errors.lastName }" v-model="form.lastName"
+                            @input="e => form.lastName = e.target.value.replace(/[^a-zA-Z]/g, '')" />
+                    </div>
+                    <div>
+                        <label>Spouse Name</label><br />
+                        <InputText class="w-full border border-slate-300 rounded-md h-10"
+                            :class="{ 'border-red-500': errors.lastName }" v-model="form.lastName"
+                            @input="e => form.lastName = e.target.value.replace(/[^a-zA-Z]/g, '')" />
+                    </div>
+                    <div>
+                        <label>Father in Law's Name</label><br />
+                        <InputText class="w-full border border-slate-300 rounded-md h-10"
+                            :class="{ 'border-red-500': errors.lastName }" v-model="form.lastName"
+                            @input="e => form.lastName = e.target.value.replace(/[^a-zA-Z]/g, '')" />
                     </div>
                 </div>
                 <div>
