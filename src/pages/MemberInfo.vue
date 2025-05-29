@@ -72,42 +72,7 @@
                         <small v-if="errors.email" class="text-red-500">Enter a valid email address.</small>
                     </div>
 
-                    <div>
-                        <label>Identity Type</label><br />
-                        <Dropdown class="w-full border border-slate-300 rounded-md h-10"
-                            :class="{ 'border-red-500': errors.identityType }" v-model="form.identityType"
-                            :options="identityOptions" optionLabel="name" placeholder="Select Identity Type" />
-                        <small v-if="errors.identityType" class="text-red-500">Identity Type is required.</small>
-                    </div>
 
-
-                    <div>
-                        <label>Identity No</label><br />
-                        <InputText class="w-full border border-slate-300 rounded-md h-10"
-                            :class="{ 'border-red-500': errors.identityNo }" v-model="form.identityNo" />
-                        <small v-if="errors.identityNo" class="text-red-500">Identity No is required.</small>
-                    </div>
-
-                    <div>
-                        <label>Issued Date</label><br />
-                        <DatePicker class="w-full border border-slate-200 rounded-md h-10"
-                            :class="{ 'border-red-500': errors.issuedDate }" v-model="form.issuedDate" />
-                        <small v-if="errors.dob" class="text-red-500">Date of Birth is required.</small>
-                    </div>
-
-                    <div>
-                        <label>Issued Authority</label><br />
-                        <InputText class="w-full border border-slate-300 rounded-md h-10"
-                            :class="{ 'border-red-500': errors.issuedAuthority }" v-model="form.issuedAuthority" />
-                        <small v-if="errors.issuedAuthority" class="text-red-500">Issued Authority is required.</small>
-                    </div>
-
-                    <div>
-                        <label>Education</label><br />
-                        <InputText class="w-full border border-slate-300 rounded-md h-10"
-                            :class="{ 'border-red-500': errors.education }" v-model="form.education" />
-                        <small v-if="errors.education" class="text-red-500">Education is required.</small>
-                    </div>
                 </div>
                 <div>
                     <Button label="Next" class="w-full lg:w-40" @click="submitForm" />
@@ -118,7 +83,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
 import DatePicker from 'primevue/datepicker';
@@ -126,12 +91,17 @@ import Dropdown from 'primevue/dropdown';
 import Button from 'primevue/button';
 import { useRouter } from 'vue-router';
 import { useKycFormStore } from '@/stores/kycForm';
+import { toRaw } from 'vue'
+
 
 const router = useRouter()
 const kycStore = useKycFormStore();
 
 
-const form = ref({ ...kycStore.personalInfo });
+const form = computed({
+    get: () => kycStore.form,
+    set: (val) => kycStore.updateForm(val),
+});
 
 const errors = ref({
     salutation: false,
@@ -143,11 +113,6 @@ const errors = ref({
     mobile: false,
     phone: false,
     email: false,
-    identityType: false,
-    identityNo: false,
-    issuedDate: false,
-    issuedAuthority: false,
-    education: false,
 });
 
 const salutationOptions = ref([
@@ -192,14 +157,10 @@ const submitForm = () => {
     if (!f.mobile || f.mobile.toString().length !== 10) errors.value.mobile = hasError = true;
     if (!f.phone || f.phone.toString().length !== 7) errors.value.phone = hasError = true;
     if (!f.email || !isValidEmail(f.email)) errors.value.email = hasError = true;
-    if (!f.identityType) errors.value.identityType = hasError = true;
-    if (!f.identityNo) errors.value.identityNo = hasError = true;
-    if (!f.issuedDate) errors.value.issuedDate = hasError = true;
-    if (!f.issuedAuthority) errors.value.issuedAuthority = hasError = true;
-    if (!f.education) errors.value.education = hasError = true;
 
     if (hasError) return;
-
+    const customer_data = toRaw(f)
+    kycStore.updateForm(customer_data)
     router.push('/kyc-address-info')
 };
 </script>

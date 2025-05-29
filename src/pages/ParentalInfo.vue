@@ -55,17 +55,20 @@
     </div>
 </template>
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
+import { useFamilyStore } from '@/stores/family';
+import { toRaw } from 'vue'
+import { useRouter } from 'vue-router';
 
-const form = ref({
-    fatherName: '',
-    motherName: '',
-    grandFatherName: '',
-    grandMotherName: '',
-    spouseName: '',
-    fatherInLawName: '',
+const familyStore = useFamilyStore()
+const router = useRouter()
+
+
+const form = computed({
+    get: () => familyStore.form,
+    set: (val) => familyStore.updateForm(val),
 });
 
 const errors = ref({
@@ -97,23 +100,35 @@ const submitForm = () => {
     resetErrors();
 
     let hasError = false;
-    const fields = [
+    const requiredFields = [
         'fatherName',
         'motherName',
         'grandFatherName',
         'grandMotherName',
-        'spouseName',
-        'fatherInLawName',
     ];
 
-    fields.forEach(field => {
+    requiredFields.forEach(field => {
         if (!validateField(field, form.value[field])) {
+            hasError = true;
+        }
+    });
+
+
+    ['spouseName', 'fatherInLawName'].forEach(field => {
+        const val = form.value[field];
+        if (val && !isAlphabetic(val)) {
+            errors.value[field] = true;
             hasError = true;
         }
     });
 
     if (hasError) return;
 
+    const familyData = toRaw(form.value);
+    familyStore.updateForm(familyData);
+    router.push('/kyc-declaration-info');
+
     console.log('Family details are valid:', form.value);
 };
+
 </script>

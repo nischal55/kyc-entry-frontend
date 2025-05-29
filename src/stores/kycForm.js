@@ -1,4 +1,3 @@
-// src/stores/kycForm.js
 import { defineStore } from 'pinia'
 
 export const useKycFormStore = defineStore('kycForm', {
@@ -13,39 +12,7 @@ export const useKycFormStore = defineStore('kycForm', {
             mobile: null,
             phone: null,
             email: '',
-            identityType: '',
-            identityNo: '',
-            issuedDate: '',
-            issuedAuthority: '',
-            education: '',
-        },
-        address: {
-            permanent: {
-                country: '',
-                province: '',
-                district: '',
-                localBody: '',
-                wardNo: null,
-                tole: '',
-                houseNo: null,
-                phone: null,
-                mobile: null,
-                email: ''
-            },
-            temporary: {
-                country: '',
-                province: '',
-                district: '',
-                localBody: '',
-                wardNo: null,
-                tole: '',
-                houseNo: null,
-                phone: null,
-                mobile: null,
-                email: ''
-            },
-            sameAsPermanent: false
-        },
+        }
     }),
     actions: {
         updateForm(data) {
@@ -62,31 +29,7 @@ export const useKycFormStore = defineStore('kycForm', {
                 mobile: null,
                 phone: null,
                 email: '',
-                identityType: '',
-                identityNo: '',
-                issuedDate: '',
-                issuedAuthority: '',
-                education: '',
             }
-        },
-        copyPermanentToTemporary() {
-            this.address.temporary = { ...this.address.permanent }
-            this.address.sameAsPermanent = true
-            },
-            clearTemporary() {
-            this.address.temporary = {
-                country: '',
-                province: '',
-                district: '',
-                localBody: '',
-                wardNo: null,
-                tole: '',
-                houseNo: null,
-                phone: null,
-                mobile: null,
-                email: ''
-            }
-            this.address.sameAsPermanent = false
-            }
-        }   
+        }
+    }
 })
