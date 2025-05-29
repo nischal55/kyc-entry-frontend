@@ -158,7 +158,7 @@ const submitForm = () => {
 
     const familyData = toRaw(form.value);
     familyStore.updateForm(familyData);
-    router.push('/kyc-declaration-info');
+    router.push('/kyc-financial-info');
 
     console.log('Family details are valid:', form.value);
 };
