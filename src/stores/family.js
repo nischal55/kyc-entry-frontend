@@ -9,6 +9,7 @@ export const useFamilyStore = defineStore('family', {
             grandMotherName: '',
             spouseName: '',
             fatherInLawName: '',
+            isMarried: null,
         }
     }),
     actions: {
@@ -23,6 +24,7 @@ export const useFamilyStore = defineStore('family', {
                 grandMotherName: '',
                 spouseName: '',
                 fatherInLawName: '',
+                isMarried: null
             }
         }
     }

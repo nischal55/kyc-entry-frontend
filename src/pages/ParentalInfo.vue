@@ -32,17 +32,37 @@
                             @input="e => form.grandMotherName = e.target.value.replace(/[^a-zA-Z ]/g, '')" />
                         <small v-if="errors.grandMotherName" class="text-red-500">Please enter a valid name.</small>
                     </div>
-                    <div>
+
+                    <!-- Marital Status Checkbox -->
+                    <div class="col-span-2">
+                        <label class="block mb-2">Marital Status</label>
+                        <div class="flex items-center gap-5">
+                            <div class="flex items-center gap-2">
+                                <input type="radio" id="marriedYes" :value="true" v-model="form.married" />
+                                <label for="marriedYes" class="text-sm font-medium">Married</label>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input type="radio" id="marriedNo" :value="false" v-model="form.married" />
+                                <label for="marriedNo" class="text-sm font-medium">Unmarried</label>
+                            </div>
+                        </div>
+                        <small v-if="errors.married" class="text-red-500">Please select your marital status.</small>
+                    </div>
+
+                    <!-- Conditionally rendered fields -->
+                    <div v-if="form.married">
                         <label>Spouse Name</label><br />
                         <InputText class="w-full border rounded-md h-10"
                             :class="{ 'border-red-500': errors.spouseName }" v-model="form.spouseName"
+                            :disabled="!form.married"
                             @input="e => form.spouseName = e.target.value.replace(/[^a-zA-Z ]/g, '')" />
                         <small v-if="errors.spouseName" class="text-red-500">Please enter a valid name.</small>
                     </div>
-                    <div>
+                    <div v-if="form.married">
                         <label>Father-in-Law's Name</label><br />
                         <InputText class="w-full border rounded-md h-10"
                             :class="{ 'border-red-500': errors.fatherInLawName }" v-model="form.fatherInLawName"
+                            :disabled="!form.married"
                             @input="e => form.fatherInLawName = e.target.value.replace(/[^a-zA-Z ]/g, '')" />
                         <small v-if="errors.fatherInLawName" class="text-red-500">Please enter a valid name.</small>
                     </div>
@@ -54,17 +74,17 @@
         </div>
     </div>
 </template>
+
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import { useFamilyStore } from '@/stores/family';
-import { toRaw } from 'vue'
+import { toRaw } from 'vue';
 import { useRouter } from 'vue-router';
 
-const familyStore = useFamilyStore()
-const router = useRouter()
-
+const familyStore = useFamilyStore();
+const router = useRouter();
 
 const form = computed({
     get: () => familyStore.form,
@@ -78,7 +98,9 @@ const errors = ref({
     grandMotherName: false,
     spouseName: false,
     fatherInLawName: false,
+    married: false, // <-- new error field
 });
+
 
 const isAlphabetic = (value) => /^[A-Za-z ]+$/.test(value);
 
@@ -87,6 +109,14 @@ const resetErrors = () => {
         errors.value[key] = false;
     });
 };
+
+// Watch for marital status change and reset fields
+watch(() => form.value.married, (newVal) => {
+    if (!newVal) {
+        form.value.spouseName = '';
+        form.value.fatherInLawName = '';
+    }
+});
 
 const validateField = (fieldName, value) => {
     if (!value || !isAlphabetic(value)) {
@@ -98,29 +128,31 @@ const validateField = (fieldName, value) => {
 
 const submitForm = () => {
     resetErrors();
-
     let hasError = false;
-    const requiredFields = [
-        'fatherName',
-        'motherName',
-        'grandFatherName',
-        'grandMotherName',
-    ];
 
+    const requiredFields = ['fatherName', 'motherName', 'grandFatherName', 'grandMotherName', 'married'];
     requiredFields.forEach(field => {
         if (!validateField(field, form.value[field])) {
             hasError = true;
         }
     });
 
+    // Validate marital status
+    if (form.value.married === null) {
+        errors.value.married = true;
+        hasError = true;
+    }
 
-    ['spouseName', 'fatherInLawName'].forEach(field => {
-        const val = form.value[field];
-        if (val && !isAlphabetic(val)) {
-            errors.value[field] = true;
-            hasError = true;
-        }
-    });
+    // If married, validate additional fields
+    if (form.value.married) {
+        ['spouseName', 'fatherInLawName'].forEach(field => {
+            const val = form.value[field];
+            if (val && !isAlphabetic(val)) {
+                errors.value[field] = true;
+                hasError = true;
+            }
+        });
+    }
 
     if (hasError) return;
 
