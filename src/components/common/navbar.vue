@@ -27,7 +27,7 @@
         <div class="" @click="handleFinancialClick">
             <div class="w-28 h-28 bg-white rounded-full flex items-center justify-center cursor-pointer ">
                 <span class="text-gray-700">
-                    <i class="pi pi-users" style="font-size: 3rem;"></i>
+                    <i class="pi pi-receipt" style="font-size: 3rem;"></i>
                 </span>
             </div>
             <p class="mt-5 text-slate-600 text-md">Financial Details</p>

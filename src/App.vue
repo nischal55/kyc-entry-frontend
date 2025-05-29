@@ -5,7 +5,7 @@ import navbar from './components/common/navbar.vue';
 </script>
 
 <template>
-  <div class="bg-slate-100 h-screen">
+  <div class="bg-slate-100 h-screen overflow-scroll pb-10">
     <Toast />
     <navbar />
     <router-view />
