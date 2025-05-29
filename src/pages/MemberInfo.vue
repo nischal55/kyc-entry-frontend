@@ -1,53 +1,110 @@
 <template>
-    <Toast />
     <div class="flex justify-center">
-        <div class="w-[60%] h-[35rem] mt-10 shadow-md bg-white rounded-md">
+        <div class="w-[60%] p-5 mt-10 shadow-md bg-white rounded-md overflow-scroll">
             <div class="p-10">
                 <p class="text-blue-800 font-bold text-xl">Personal Informations</p>
                 <div class="grid grid-cols-2 gap-5 py-10">
+                    <div>
+                        <label>Salutation</label><br />
+                        <Dropdown class="w-full border border-slate-200 rounded-md h-10"
+                            :class="{ 'border-red-500': errors.salutation }" v-model="form.salutation"
+                            :options="salutationOptions" optionLabel="name" placeholder="Select Salutation" />
+                        <small v-if="errors.salutation" class="text-red-500">Salutation is required.</small>
+                    </div>
+
                     <div>
                         <label>First Name</label><br />
                         <InputText class="w-full border border-slate-300 rounded-md h-10"
                             :class="{ 'border-red-500': errors.firstName }" v-model="form.firstName"
                             @input="e => form.firstName = e.target.value.replace(/[^a-zA-Z]/g, '')" />
+                        <small v-if="errors.firstName" class="text-red-500">Enter a valid First Name.</small>
                     </div>
+
                     <div>
                         <label>Middle Name</label><br />
                         <InputText class="w-full border border-slate-300 rounded-md h-10"
                             :class="{ 'border-red-500': errors.middleName }" v-model="form.middleName"
                             @input="e => form.middleName = e.target.value.replace(/[^a-zA-Z]/g, '')" />
+                        <small v-if="errors.middleName" class="text-red-500">Enter a valid Middle Name.</small>
                     </div>
+
                     <div>
                         <label>Last Name</label><br />
                         <InputText class="w-full border border-slate-300 rounded-md h-10"
                             :class="{ 'border-red-500': errors.lastName }" v-model="form.lastName"
                             @input="e => form.lastName = e.target.value.replace(/[^a-zA-Z]/g, '')" />
+                        <small v-if="errors.lastName" class="text-red-500">Enter a valid Last Name.</small>
                     </div>
+
                     <div>
                         <label>Date of Birth</label><br />
                         <DatePicker class="w-full border border-slate-200 rounded-md h-10"
                             :class="{ 'border-red-500': errors.dob }" v-model="form.dob" />
+                        <small v-if="errors.dob" class="text-red-500">Date of Birth is required.</small>
                     </div>
+
                     <div>
                         <label>Gender</label><br />
                         <Dropdown class="w-full border border-slate-200 rounded-md h-10"
                             :class="{ 'border-red-500': errors.gender }" v-model="form.gender" :options="genderOptions"
                             optionLabel="name" placeholder="Select Gender" />
+                        <small v-if="errors.gender" class="text-red-500">Gender is required.</small>
                     </div>
+
                     <div>
                         <label>Mobile No</label><br />
                         <InputNumber class="w-full border border-slate-200 rounded-md h-10"
                             :class="{ 'border-red-500': errors.mobile }" v-model="form.mobile" :useGrouping="false" />
+                        <small v-if="errors.mobile" class="text-red-500">Mobile number must be 10 digits.</small>
                     </div>
+
                     <div>
                         <label>Phone No</label><br />
                         <InputNumber class="w-full border border-slate-200 rounded-md h-10"
                             :class="{ 'border-red-500': errors.phone }" v-model="form.phone" :useGrouping="false" />
+                        <small v-if="errors.phone" class="text-red-500">Phone number must be 7 digits.</small>
                     </div>
+
                     <div>
                         <label>Email</label><br />
                         <InputText class="w-full border border-slate-300 rounded-md h-10"
                             :class="{ 'border-red-500': errors.email }" type="email" v-model="form.email" />
+                        <small v-if="errors.email" class="text-red-500">Enter a valid email address.</small>
+                    </div>
+
+                    <div>
+                        <label>Identity Type</label><br />
+                        <InputText class="w-full border border-slate-300 rounded-md h-10"
+                            :class="{ 'border-red-500': errors.identityType }" v-model="form.identityType" />
+                        <small v-if="errors.identityType" class="text-red-500">Identity Type is required.</small>
+                    </div>
+
+                    <div>
+                        <label>Identity No</label><br />
+                        <InputText class="w-full border border-slate-300 rounded-md h-10"
+                            :class="{ 'border-red-500': errors.identityNo }" v-model="form.identityNo" />
+                        <small v-if="errors.identityNo" class="text-red-500">Identity No is required.</small>
+                    </div>
+
+                    <div>
+                        <label>Issued Date</label><br />
+                        <InputText class="w-full border border-slate-300 rounded-md h-10"
+                            :class="{ 'border-red-500': errors.issuedDate }" v-model="form.issuedDate" />
+                        <small v-if="errors.issuedDate" class="text-red-500">Issued Date is required.</small>
+                    </div>
+
+                    <div>
+                        <label>Issued Authority</label><br />
+                        <InputText class="w-full border border-slate-300 rounded-md h-10"
+                            :class="{ 'border-red-500': errors.issuedAuthority }" v-model="form.issuedAuthority" />
+                        <small v-if="errors.issuedAuthority" class="text-red-500">Issued Authority is required.</small>
+                    </div>
+
+                    <div>
+                        <label>Education</label><br />
+                        <InputText class="w-full border border-slate-300 rounded-md h-10"
+                            :class="{ 'border-red-500': errors.education }" v-model="form.education" />
+                        <small v-if="errors.education" class="text-red-500">Education is required.</small>
                     </div>
                 </div>
                 <div>
@@ -65,12 +122,9 @@ import InputNumber from 'primevue/inputnumber';
 import DatePicker from 'primevue/datepicker';
 import Dropdown from 'primevue/dropdown';
 import Button from 'primevue/button';
-import Toast from 'primevue/toast';
-import { useToast } from 'primevue/usetoast';
-
-const toast = useToast();
 
 const form = ref({
+    salutation: null,
     firstName: '',
     middleName: '',
     lastName: '',
@@ -79,9 +133,15 @@ const form = ref({
     mobile: null,
     phone: null,
     email: '',
+    identityType: '',
+    identityNo: '',
+    issuedDate: '',
+    issuedAuthority: '',
+    education: '',
 });
 
 const errors = ref({
+    salutation: false,
     firstName: false,
     middleName: false,
     lastName: false,
@@ -90,7 +150,18 @@ const errors = ref({
     mobile: false,
     phone: false,
     email: false,
+    identityType: false,
+    identityNo: false,
+    issuedDate: false,
+    issuedAuthority: false,
+    education: false,
 });
+
+const salutationOptions = ref([
+    { name: 'Mr' },
+    { name: 'Mrs' },
+    { name: 'Miss' },
+]);
 
 const genderOptions = ref([
     { name: 'Male' },
@@ -100,21 +171,10 @@ const genderOptions = ref([
 
 const isAlphabetic = (value) => /^[A-Za-z]+$/.test(value);
 const isValidEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-const isExactDigits = (value, length) =>
-    typeof value === 'number' && value.toString().length === length;
 
 const resetErrors = () => {
     Object.keys(errors.value).forEach((key) => {
         errors.value[key] = false;
-    });
-};
-
-const showError = (message) => {
-    toast.add({
-        severity: 'error',
-        summary: 'Validation Error',
-        detail: message,
-        life: 3000,
     });
 };
 
@@ -124,89 +184,23 @@ const submitForm = () => {
 
     let hasError = false;
 
-    // First Name
-    if (!f.firstName) {
-        errors.value.firstName = true;
-        hasError = true;
-        showError('Enter the Valid First Name.');
-    } else if (!isAlphabetic(f.firstName)) {
-        errors.value.firstName = true;
-        hasError = true;
-        showError('Enter the Valid First Name.');
-    }
+    if (!f.salutation) errors.value.salutation = hasError = true;
+    if (!f.firstName || !isAlphabetic(f.firstName)) errors.value.firstName = hasError = true;
+    if (f.middleName && !isAlphabetic(f.middleName)) errors.value.middleName = hasError = true;
+    if (!f.lastName || !isAlphabetic(f.lastName)) errors.value.lastName = hasError = true;
+    if (!f.dob) errors.value.dob = hasError = true;
+    if (!f.gender) errors.value.gender = hasError = true;
+    if (!f.mobile || f.mobile.toString().length !== 10) errors.value.mobile = hasError = true;
+    if (!f.phone || f.phone.toString().length !== 7) errors.value.phone = hasError = true;
+    if (!f.email || !isValidEmail(f.email)) errors.value.email = hasError = true;
+    if (!f.identityType) errors.value.identityType = hasError = true;
+    if (!f.identityNo) errors.value.identityNo = hasError = true;
+    if (!f.issuedDate) errors.value.issuedDate = hasError = true;
+    if (!f.issuedAuthority) errors.value.issuedAuthority = hasError = true;
+    if (!f.education) errors.value.education = hasError = true;
 
-    // Middle Name (optional)
-    if (f.middleName && !isAlphabetic(f.middleName)) {
-        errors.value.middleName = true;
-        hasError = true;
-        showError('Enter the Valid Middle Name.');
-    }
-
-    // Last Name
-    if (!f.lastName) {
-        errors.value.lastName = true;
-        hasError = true;
-        showError('Enter the Valid Last Name.');
-    } else if (!isAlphabetic(f.lastName)) {
-        errors.value.lastName = true;
-        hasError = true;
-        showError('Last Name should contain only letters.');
-    }
-
-    // DOB
-    if (!f.dob) {
-        errors.value.dob = true;
-        hasError = true;
-        showError('Date of Birth is required.');
-    }
-
-    // Gender
-    if (!f.gender) {
-        errors.value.gender = true;
-        hasError = true;
-        showError('Gender is required.');
-    }
-
-    // Mobile No - must be exactly 10 digits
-    const mobileStr = f.mobile != null ? f.mobile.toString() : '';
-    if (!mobileStr || mobileStr.length !== 10 || !/^\d{10}$/.test(mobileStr)) {
-        errors.value.mobile = true;
-        hasError = true;
-        showError('Mobile number must be exactly 10 digits.');
-    }
-
-    // Phone No - must be exactly 7 digits
-    const phoneStr = f.phone != null ? f.phone.toString() : '';
-    if (!phoneStr || phoneStr.length !== 7 || !/^\d{7}$/.test(phoneStr)) {
-        errors.value.phone = true;
-        hasError = true;
-        showError('Phone number must be exactly 7 digits.');
-    }
-
-    // Email
-    if (!f.email) {
-        errors.value.email = true;
-        hasError = true;
-        showError('Email is required.');
-    } else if (!isValidEmail(f.email)) {
-        errors.value.email = true;
-        hasError = true;
-        showError('Please enter a valid email address.');
-    }
-
-    if (hasError) {
-        // Just return after showing all toasts
-        return;
-    }
-
-    toast.add({
-        severity: 'success',
-        summary: 'Form Submitted',
-        detail: 'All required fields are valid!',
-        life: 3000,
-    });
+    if (hasError) return;
 
     console.log('Form Data:', f);
 };
-
 </script>
