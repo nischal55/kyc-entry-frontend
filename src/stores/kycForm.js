@@ -13,11 +13,6 @@ export const useKycFormStore = defineStore('kycForm', {
             mobile: null,
             phone: null,
             email: '',
-            identityType: '',
-            identityNo: '',
-            issuedDate: '',
-            issuedAuthority: '',
-            education: '',
         }
     }),
     actions: {
@@ -35,11 +30,6 @@ export const useKycFormStore = defineStore('kycForm', {
                 mobile: null,
                 phone: null,
                 email: '',
-                identityType: '',
-                identityNo: '',
-                issuedDate: '',
-                issuedAuthority: '',
-                education: '',
             }
         }
     }
