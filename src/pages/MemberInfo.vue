@@ -25,23 +25,23 @@
                     </div>
                     <div>
                         <label>Date of Birth</label><br />
-                        <DatePicker class="w-full border border-slate-300 rounded-md h-10"
+                        <DatePicker class="w-full border border-slate-200 rounded-md h-10"
                             :class="{ 'border-red-500': errors.dob }" v-model="form.dob" />
                     </div>
                     <div>
                         <label>Gender</label><br />
-                        <Dropdown class="w-full border border-slate-300 rounded-md h-10"
+                        <Dropdown class="w-full border border-slate-200 rounded-md h-10"
                             :class="{ 'border-red-500': errors.gender }" v-model="form.gender" :options="genderOptions"
                             optionLabel="name" placeholder="Select Gender" />
                     </div>
                     <div>
                         <label>Mobile No</label><br />
-                        <InputNumber class="w-full border border-slate-300 rounded-md h-10"
+                        <InputNumber class="w-full border border-slate-200 rounded-md h-10"
                             :class="{ 'border-red-500': errors.mobile }" v-model="form.mobile" :useGrouping="false" />
                     </div>
                     <div>
                         <label>Phone No</label><br />
-                        <InputNumber class="w-full border border-slate-300 rounded-md h-10"
+                        <InputNumber class="w-full border border-slate-200 rounded-md h-10"
                             :class="{ 'border-red-500': errors.phone }" v-model="form.phone" :useGrouping="false" />
                     </div>
                     <div>
