@@ -68,18 +68,19 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
 import Button from 'primevue/button';
+import { useFinancialStore } from '@/stores/financialStore';
+import { useRouter } from 'vue-router';
 
-const form = ref({
-    annualIncome: null,
-    transactionVolume: null,
-    occupation: '',
-    designation: '',
-    pan: '',
-    sourceOfIncome: '',
+const financialStore = useFinancialStore();
+const router = useRouter()
+
+const form = computed({
+    get: () => financialStore.form,
+    set: (val) => financialStore.updateForm(val),
 });
 
 const errors = ref({
@@ -141,6 +142,8 @@ const submitForm = () => {
 
     if (hasError) return;
 
-    console.log('Form Data:', f);
+    const financialData = toRaw(form.value);
+    financialStore.updateForm(financialData);
+    router.push('/kyc-identity-info');
 };
 </script>
