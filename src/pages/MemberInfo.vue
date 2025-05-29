@@ -155,7 +155,7 @@ const submitForm = () => {
     if (!f.dob) errors.value.dob = hasError = true;
     if (!f.gender) errors.value.gender = hasError = true;
     if (!f.mobile || f.mobile.toString().length !== 10) errors.value.mobile = hasError = true;
-    if (f.phone.toString().length !== 10) errors.value.phone = hasError = true;
+    if (f.phone && f.phone.toString().length !== 10) errors.value.phone = hasError = true;
     if (!f.email || !isValidEmail(f.email)) errors.value.email = hasError = true;
 
     if (hasError) return;

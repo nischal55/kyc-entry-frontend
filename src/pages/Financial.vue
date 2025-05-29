@@ -74,6 +74,7 @@ import InputNumber from 'primevue/inputnumber';
 import Button from 'primevue/button';
 import { useFinancialStore } from '@/stores/financialStore';
 import { useRouter } from 'vue-router';
+import { toRaw } from 'vue'
 
 const financialStore = useFinancialStore();
 const router = useRouter()
