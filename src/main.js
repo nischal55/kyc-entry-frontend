@@ -9,8 +9,12 @@ import Button from "primevue/button"
 import InputNumber from 'primevue/inputnumber';
 import InputText from 'primevue/inputtext';
 import ToastService from 'primevue/toastservice';
+import { createPinia } from 'pinia';
 
 const app = createApp(App);
+const pinia = createPinia();
+
+app.use(pinia);
 app.component('Button', Button);
 app.component('InputNumber', InputNumber)
 app.component('InputText', InputText)

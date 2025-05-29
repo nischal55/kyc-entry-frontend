@@ -1,9 +1,9 @@
 <template>
     <div class="flex justify-center">
-        <div class="w-[60%] p-5 mt-10 shadow-md bg-white rounded-md overflow-scroll">
-            <div class="p-10">
+        <div class="w-[90%] lg:w-[60%] p-2 lg:p-5 mt-10 shadow-md bg-white rounded-md overflow-scroll">
+            <div class="lg:p-10 p-2">
                 <p class="text-blue-800 font-bold text-xl">Personal Informations</p>
-                <div class="grid grid-cols-2 gap-5 py-10">
+                <div class="grid grid-col-1 lg:grid-cols-2 lg:gap-5 py-10">
                     <div>
                         <label>Salutation</label><br />
                         <Dropdown class="w-full border border-slate-200 rounded-md h-10"
@@ -74,10 +74,12 @@
 
                     <div>
                         <label>Identity Type</label><br />
-                        <InputText class="w-full border border-slate-300 rounded-md h-10"
-                            :class="{ 'border-red-500': errors.identityType }" v-model="form.identityType" />
+                        <Dropdown class="w-full border border-slate-300 rounded-md h-10"
+                            :class="{ 'border-red-500': errors.identityType }" v-model="form.identityType"
+                            :options="identityOptions" optionLabel="name" placeholder="Select Identity Type" />
                         <small v-if="errors.identityType" class="text-red-500">Identity Type is required.</small>
                     </div>
+
 
                     <div>
                         <label>Identity No</label><br />
@@ -88,9 +90,9 @@
 
                     <div>
                         <label>Issued Date</label><br />
-                        <InputText class="w-full border border-slate-300 rounded-md h-10"
+                        <DatePicker class="w-full border border-slate-200 rounded-md h-10"
                             :class="{ 'border-red-500': errors.issuedDate }" v-model="form.issuedDate" />
-                        <small v-if="errors.issuedDate" class="text-red-500">Issued Date is required.</small>
+                        <small v-if="errors.dob" class="text-red-500">Date of Birth is required.</small>
                     </div>
 
                     <div>
@@ -108,7 +110,7 @@
                     </div>
                 </div>
                 <div>
-                    <Button label="Next" class="w-40" @click="submitForm" />
+                    <Button label="Next" class="w-full lg:w-40" @click="submitForm" />
                 </div>
             </div>
         </div>
@@ -122,23 +124,14 @@ import InputNumber from 'primevue/inputnumber';
 import DatePicker from 'primevue/datepicker';
 import Dropdown from 'primevue/dropdown';
 import Button from 'primevue/button';
+import { useRouter } from 'vue-router';
+import { useKycFormStore } from '@/stores/kycForm';
 
-const form = ref({
-    salutation: null,
-    firstName: '',
-    middleName: '',
-    lastName: '',
-    dob: null,
-    gender: null,
-    mobile: null,
-    phone: null,
-    email: '',
-    identityType: '',
-    identityNo: '',
-    issuedDate: '',
-    issuedAuthority: '',
-    education: '',
-});
+const router = useRouter()
+const kycStore = useKycFormStore();
+
+
+const form = ref({ ...kycStore.personalInfo });
 
 const errors = ref({
     salutation: false,
@@ -161,6 +154,12 @@ const salutationOptions = ref([
     { name: 'Mr' },
     { name: 'Mrs' },
     { name: 'Miss' },
+]);
+
+const identityOptions = ref([
+    { name: 'Citizenship' },
+    { name: 'Passport' },
+    { name: 'Election Card' },
 ]);
 
 const genderOptions = ref([
@@ -201,6 +200,6 @@ const submitForm = () => {
 
     if (hasError) return;
 
-    console.log('Form Data:', f);
+    router.push('/kyc-address-info')
 };
 </script>

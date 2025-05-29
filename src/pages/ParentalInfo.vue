@@ -114,6 +114,6 @@ const submitForm = () => {
 
     if (hasError) return;
 
-    console.log('✅ Family details are valid:', form.value);
+    console.log('Family details are valid:', form.value);
 };
 </script>
