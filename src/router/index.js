@@ -6,6 +6,7 @@ import Home from '@/pages/Home.vue'
 import ParentalInfo from '@/pages/ParentalInfo.vue'
 import Financial from '@/pages/Financial.vue'
 import IdentityDetail from '@/pages/IdentityDetail.vue'
+import AddressForm from '@/pages/AddressForm.vue'
 
 const routes = [
     {
@@ -42,6 +43,11 @@ const routes = [
         path: '/kyc-identity-info',
         name: 'kyc-identity-info',
         component: IdentityDetail,
+    },
+    {
+        path:'/kyc-address-form',
+        name: 'kyc-address-form',
+        component: AddressForm,
     }
 ]
 

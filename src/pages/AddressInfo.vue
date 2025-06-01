@@ -133,7 +133,7 @@
         </div>
 
         <!-- ─── Checkbox: Same as Permanent? ──── -->
-        <div class="py-4 flex items-center">
+        <!-- <div class="py-4 flex items-center">
           <input
             type="checkbox"
             id="sameAddress"
@@ -143,7 +143,7 @@
           <label for="sameAddress" class="font-medium">
             Temporary address same as permanent
           </label>
-        </div>
+        </div> -->
 
         <!-- ───── TEMPORARY ADDRESS SECTION ───── -->
         <p class="text-blue-600 font-bold text-xl pt-4">Temporary Address</p>
@@ -300,21 +300,29 @@ const router = useRouter();
 const kycStore = useAddressStore();
 const isLoading = ref(false);
 
-const sameAsPermanentComputed = computed({
-  get: () => kycStore.address.sameAsPermanent,
-  set: (val) => {
-    if (val) {
-      kycStore.copyPermanentToTemporary();
-      districtOptions.temporary = [...districtOptions.permanent];
-      localBodyOptions.temporary = [...localBodyOptions.permanent];
-    } else {
-      kycStore.clearTemporary();
-      districtOptions.temporary = [];
-      localBodyOptions.temporary = [];
-    }
+// ─── Reactive form data ─────────────────────────────────────────────────────
+const form = reactive({
+  permanent: {
+    country: '',
+    province: '',
+    district: '',
+    localBody: '',
+    wardNo: null,
+    tole: '',
+    houseNo: null
+  },
+  temporary: {
+    country: '',
+    province: '',
+    district: '',
+    localBody: '',
+    wardNo: null,
+    tole: '',
+    houseNo: null
   }
 });
 
+// ─── Error state ─────────────────────────────────────────────────────────────
 const errors = reactive({
   permanent: {
     country: false,
@@ -335,7 +343,6 @@ const errors = reactive({
     houseNo: false,
   }
 });
-
 const errorMessages = reactive({
   permanent: {
     country: '',
@@ -344,7 +351,7 @@ const errorMessages = reactive({
     localBody: '',
     wardNo: '',
     tole: '',
-    houseNo: '',
+    houseNo: ''
   },
   temporary: {
     country: '',
@@ -353,10 +360,11 @@ const errorMessages = reactive({
     localBody: '',
     wardNo: '',
     tole: '',
-    houseNo: '',
+    houseNo: ''
   }
 });
 
+// ─── Dropdown options ────────────────────────────────────────────────────────
 const countryOptions = ref([{ name: 'Nepal' }]);
 const provinceOptions = ref([]);
 const districtOptions = reactive({
@@ -368,57 +376,205 @@ const localBodyOptions = reactive({
   temporary: []
 });
 
-const form = reactive({
-  permanent: { ...kycStore.address.permanent },
-  temporary: { ...kycStore.address.temporary }
-});
-
-// Watch form.permanent and only update store with valid district and localBody
-watch(
-  () => form.permanent,
-  (newPermanent) => {
-    console.log('Permanent address changed:', newPermanent);
-    // Only update store if district and localBody are non-empty
-    if (newPermanent.district && newPermanent.localBody) {
-      kycStore.updatePermanentAddress(newPermanent);
-      console.log('Updated Pinia store (permanent):', kycStore.address.permanent);
-    }
-    if (sameAsPermanentComputed.value) {
-      form.temporary = { ...form.permanent };
+// ─── “Same as Permanent?” toggle ────────────────────────────────────────────
+const sameAsPermanentComputed = computed({
+  get: () => kycStore.address.sameAsPermanent,
+  set: (val) => {
+    kycStore.setSameAsPermanent(val);
+    if (val) {
+      // Copy the entire permanent object into temporary (reactively)
+      Object.assign(form.temporary, form.permanent);
+      // Mirror the loaded districts/localBodies
       districtOptions.temporary = [...districtOptions.permanent];
       localBodyOptions.temporary = [...localBodyOptions.permanent];
-      kycStore.copyPermanentToTemporary();
     }
-  },
-  { deep: true }
-);
+  }
+});
 
-// Watch form.temporary and only update store with valid district and localBody
+// ─── Initialize `form` from the store ───────────────────────────────────────
+function initializeForm() {
+  // Use Object.assign instead of “form.permanent = { … }”
+  Object.assign(form.permanent, kycStore.address.permanent);
+  Object.assign(form.temporary, kycStore.address.temporary);
+
+  // If “sameAsPermanent” was already true in the store, copy it here as well
+  if (sameAsPermanentComputed.value) {
+    districtOptions.temporary = [...districtOptions.permanent];
+    localBodyOptions.temporary = [...localBodyOptions.permanent];
+  }
+}
+
+// ─── Watch store changes (if some other part of your app updates address) ───
 watch(
-  () => form.temporary,
-  (newTemporary) => {
-    console.log('Temporary address changed:', newTemporary);
-    if (!sameAsPermanentComputed.value && newTemporary.district && newTemporary.localBody) {
-      kycStore.updateTemporaryAddress(newTemporary);
-      console.log('Updated Pinia store (temporary):', kycStore.address.temporary);
+  () => kycStore.address,
+  (newVal) => {
+    initializeForm();
+    if (newVal.sameAsPermanent) {
+      districtOptions.temporary = [...districtOptions.permanent];
+      localBodyOptions.temporary = [...localBodyOptions.permanent];
     }
   },
-  { deep: true }
+  { deep: true, immediate: true }
 );
 
-// Watch province changes for permanent address
+// ─── Load Provinces → onMounted & keep store in sync ────────────────────────
+async function loadProvinces() {
+  try {
+    isLoading.value = true;
+    const response = await getProvinces({});
+    // Map whatever your API gives you. If your API returns “province” field, use that; otherwise fallback.
+    provinceOptions.value = Array.isArray(response)
+      ? response.map(item => ({
+          name: item.name || item.province,
+          id: item.id
+        }))
+      : [
+          // Fallback set
+          { name: 'Bagmati', id: 1 },
+          { name: 'Gandaki', id: 2 },
+          { name: 'Lumbini', id: 3 }
+        ];
+
+    // If there’s already a stored province but it’s not in options anymore, clear out the old data
+    if (
+      form.permanent.province &&
+      !provinceOptions.value.some(p => p.name === form.permanent.province)
+    ) {
+      form.permanent.province = '';
+      form.permanent.district = '';
+      form.permanent.localBody = '';
+    }
+  } catch (err) {
+    console.error('Error loading provinces:', err);
+    provinceOptions.value = [
+      { name: 'Bagmati', id: 1 },
+      { name: 'Gandaki', id: 2 },
+      { name: 'Lumbini', id: 3 }
+    ];
+    toast.add({
+      severity: 'warn',
+      summary: 'Warning',
+      detail: 'Failed to load provinces. Using default options.',
+      life: 3000
+    });
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+// ─── Load Districts for a given province ────────────────────────────────────
+async function loadDistricts(provinceName, section) {
+  try {
+    isLoading.value = true;
+    const provinceObj = provinceOptions.value.find(p => p.name.trim() === provinceName.trim());
+    if (!provinceObj || !provinceObj.id) {
+      throw new Error('Province ID not found');
+    }
+
+    const response = await getDistrict(provinceObj.id);
+    // Map based on your API’s JSON. If it’s “district_name” & “district_id,” adjust accordingly.
+    districtOptions[section] = Array.isArray(response)
+      ? response.map(item => ({
+          name: item.district || item.name || item.district_name,
+          id: item.id || item.district_id
+        }))
+      : [];
+
+    // If the user already had a stored district (from a previous session) and it still exists, keep it.
+    const storedDistrict = kycStore.address[section].district;
+    if (
+      storedDistrict &&
+      districtOptions[section].some((d) => d.name === storedDistrict)
+    ) {
+      // Assign it into the reactive form, but ONLY after options are loaded
+      form[section].district = storedDistrict;
+      await loadLocalLevels(storedDistrict, section);
+      // now localBodyOptions[section] is loaded
+      const storedLocalBody = kycStore.address[section].localBody;
+      if (
+        storedLocalBody &&
+        localBodyOptions[section].some((l) => l.name === storedLocalBody)
+      ) {
+        form[section].localBody = storedLocalBody;
+      }
+    } else {
+      // The stored district is no longer valid → clear outdated fields
+      form[section].district = '';
+      form[section].localBody = '';
+    }
+
+    // If “same as permanent,” mirror into the temporary side
+    if (section === 'permanent' && sameAsPermanentComputed.value) {
+      districtOptions.temporary = [...districtOptions.permanent];
+      localBodyOptions.temporary = [...localBodyOptions.permanent];
+    }
+  } catch (err) {
+    console.error(`Error loading districts for ${provinceName}:`, err);
+    districtOptions[section] = [];
+    toast.add({
+      severity: 'warn',
+      summary: 'Warning',
+      detail: 'Failed to load districts. Please try again.',
+      life: 3000
+    });
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+// ─── Load Local Bodies for a given district ─────────────────────────────────
+async function loadLocalLevels(districtName, section) {
+  try {
+    isLoading.value = true;
+    const districtObj = districtOptions[section].find(d => d.name.trim() === districtName.trim());
+    if (!districtObj || !districtObj.id) {
+      throw new Error('District ID not found');
+    }
+
+    const response = await getLocalLevel(districtObj.id);
+    localBodyOptions[section] = Array.isArray(response)
+      ? response.map(item => ({
+          name: item.localLevel || item.name || item.local_level || item.localbody
+        }))
+      : [];
+
+    // If the user already had a stored localBody and it still exists, keep it
+    const storedLocalBody = kycStore.address[section].localBody;
+    if (
+      storedLocalBody &&
+      localBodyOptions[section].some((l) => l.name === storedLocalBody)
+    ) {
+      form[section].localBody = storedLocalBody;
+    } else {
+      // Otherwise, clear outdated value
+      form[section].localBody = '';
+    }
+
+    // If “same as permanent,” mirror into temporary
+    if (section === 'permanent' && sameAsPermanentComputed.value) {
+      localBodyOptions.temporary = [...localBodyOptions.permanent];
+    }
+  } catch (err) {
+    console.error(`Error loading local bodies for ${districtName}:`, err);
+    localBodyOptions[section] = [];
+    toast.add({
+      severity: 'warn',
+      summary: 'Warning',
+      detail: 'Failed to load local bodies. Please try again.',
+      life: 3000
+    });
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+// ─── Watchers for Province → load Districts ─────────────────────────────────
 watch(
   () => form.permanent.province,
   async (newProvince, oldProvince) => {
-    console.log('Permanent province changed:', newProvince);
     if (newProvince && newProvince !== oldProvince) {
       await loadDistricts(newProvince, 'permanent');
-      // Only reset district and localBody if current values are invalid
-      if (form.permanent.district && !districtOptions.permanent.some(d => d.name === form.permanent.district)) {
-        form.permanent.district = '';
-        form.permanent.localBody = '';
-        localBodyOptions.permanent = [];
-      }
+      // We don’t immediately write to the store here, we wait until actual district+localBody are chosen.
     } else if (!newProvince) {
       districtOptions.permanent = [];
       localBodyOptions.permanent = [];
@@ -428,19 +584,15 @@ watch(
   }
 );
 
-// Watch province changes for temporary address
 watch(
   () => form.temporary.province,
   async (newProvince, oldProvince) => {
-    console.log('Temporary province changed:', newProvince);
-    if (newProvince && newProvince !== oldProvince && !sameAsPermanentComputed.value) {
+    if (
+      newProvince &&
+      newProvince !== oldProvince &&
+      !sameAsPermanentComputed.value
+    ) {
       await loadDistricts(newProvince, 'temporary');
-      // Only reset district and localBody if current values are invalid
-      if (form.temporary.district && !districtOptions.temporary.some(d => d.name === form.temporary.district)) {
-        form.temporary.district = '';
-        form.temporary.localBody = '';
-        localBodyOptions.temporary = [];
-      }
     } else if (!newProvince && !sameAsPermanentComputed.value) {
       districtOptions.temporary = [];
       localBodyOptions.temporary = [];
@@ -450,17 +602,12 @@ watch(
   }
 );
 
-// Watch district changes for permanent address
+// ─── Watchers for District → load LocalBody ─────────────────────────────────
 watch(
   () => form.permanent.district,
   async (newDistrict, oldDistrict) => {
-    console.log('Permanent district changed:', newDistrict);
     if (newDistrict && newDistrict !== oldDistrict) {
       await loadLocalLevels(newDistrict, 'permanent');
-      // Only reset localBody if current value is invalid
-      if (form.permanent.localBody && !localBodyOptions.permanent.some(l => l.name === form.permanent.localBody)) {
-        form.permanent.localBody = '';
-      }
     } else if (!newDistrict) {
       localBodyOptions.permanent = [];
       form.permanent.localBody = '';
@@ -468,17 +615,11 @@ watch(
   }
 );
 
-// Watch district changes for temporary address
 watch(
   () => form.temporary.district,
   async (newDistrict, oldDistrict) => {
-    console.log('Temporary district changed:', newDistrict);
     if (newDistrict && newDistrict !== oldDistrict && !sameAsPermanentComputed.value) {
       await loadLocalLevels(newDistrict, 'temporary');
-      // Only reset localBody if current value is invalid
-      if (form.temporary.localBody && !localBodyOptions.temporary.some(l => l.name === form.temporary.localBody)) {
-        form.temporary.localBody = '';
-      }
     } else if (!newDistrict && !sameAsPermanentComputed.value) {
       localBodyOptions.temporary = [];
       form.temporary.localBody = '';
@@ -486,24 +627,7 @@ watch(
   }
 );
 
-// Watch sameAsPermanentComputed to sync temporary address
-watch(sameAsPermanentComputed, (newVal) => {
-  console.log('sameAsPermanent changed:', newVal);
-  if (newVal) {
-    form.temporary = { ...form.permanent };
-    districtOptions.temporary = [...districtOptions.permanent];
-    localBodyOptions.temporary = [...localBodyOptions.permanent];
-    kycStore.copyPermanentToTemporary();
-  } else {
-    Object.keys(form.temporary).forEach(key => {
-      form.temporary[key] = key === 'wardNo' || key === 'houseNo' ? null : '';
-    });
-    districtOptions.temporary = [];
-    localBodyOptions.temporary = [];
-    kycStore.clearTemporary();
-  }
-});
-
+// ─── Validation & Submission ─────────────────────────────────────────────────
 const isAlphabetic = (value) => /^[A-Za-z\s]+$/.test(value);
 
 function resetErrors() {
@@ -535,224 +659,85 @@ function validateSection(sectionName) {
     em.country = 'Country is required.';
     showErrorToast('Country is required.');
     hasError = true;
-  } else if (!isAlphabetic(f.country)) {
-    e.country = true;
-    em.country = 'Country must contain only letters and spaces.';
-    showErrorToast('Country must contain only letters and spaces.');
-    hasError = true;
   }
-
   if (!f.province) {
     e.province = true;
     em.province = 'Province is required.';
     showErrorToast('Province is required.');
     hasError = true;
-  } else if (!isAlphabetic(f.province)) {
-    e.province = true;
-    em.province = 'Province must contain only letters and spaces.';
-    showErrorToast('Province must contain only letters and spaces.');
-    hasError = true;
   }
-
   if (!f.district) {
     e.district = true;
     em.district = 'District is required.';
     showErrorToast('District is required.');
     hasError = true;
-  } else if (!isAlphabetic(f.district)) {
-    e.district = true;
-    em.district = 'District must contain only letters and spaces.';
-    showErrorToast('District must contain only letters and spaces.');
-    hasError = true;
   }
-
   if (!f.localBody) {
     e.localBody = true;
     em.localBody = 'Local Body is required.';
     showErrorToast('Local Body is required.');
     hasError = true;
-  } else if (!isAlphabetic(f.localBody)) {
-    e.localBody = true;
-    em.localBody = 'Local Body must contain only letters and spaces.';
-    showErrorToast('Local Body must contain only letters and spaces.');
-    hasError = true;
   }
-
-  if (
-    f.wardNo === null ||
-    f.wardNo === '' ||
-    !Number.isInteger(f.wardNo) ||
-    f.wardNo <= 0
-  ) {
+  if (f.wardNo === null || f.wardNo === '' || !Number.isInteger(f.wardNo) || f.wardNo <= 0) {
     e.wardNo = true;
     em.wardNo = 'Ward No is required and must be a positive integer.';
     showErrorToast('Ward No is required and must be a positive integer.');
     hasError = true;
   }
-
   if (!f.tole || f.tole.trim() === '') {
     e.tole = true;
     em.tole = 'Tole is required.';
     showErrorToast('Tole is required.');
     hasError = true;
   }
-
-  if (
-    f.houseNo !== null &&
-    f.houseNo !== '' &&
-    (!Number.isInteger(f.houseNo) || f.houseNo <= 0)
-  ) {
-    e.houseNo = true;
-    em.houseNo = 'If provided, House No must be a positive integer.';
-    showErrorToast('If provided, House No must be a positive integer.');
-    hasError = true;
-  }
-
   return !hasError;
 }
 
-function submitForm() {
+async function submitForm() {
   resetErrors();
   const permValid = validateSection('permanent');
-  const tempValid = !sameAsPermanentComputed.value ? validateSection('temporary') : true;
+  const tempValid = sameAsPermanentComputed.value ? true : validateSection('temporary');
 
   if (!permValid || !tempValid) {
-    return;
+    return; // bail out if any section invalid
   }
 
-  kycStore.updatePermanentAddress(form.permanent);
+  // ────────────────────────────────────────────────────────────────────────
+  // Only now that everything is valid, push to the store in one shot:
+  // ────────────────────────────────────────────────────────────────────────
+  kycStore.updatePermanentAddress({ ...form.permanent });
   if (!sameAsPermanentComputed.value) {
-    kycStore.updateTemporaryAddress(form.temporary);
+    kycStore.updateTemporaryAddress({ ...form.temporary });
   }
-
-  console.log('Pinia Store State after submission:', kycStore.address);
 
   toast.add({
     severity: 'success',
     summary: 'Form Submitted',
-    detail: 'All required fields are valid!',
+    detail: 'Address details saved successfully!',
     life: 3000
   });
 
   router.push('/kyc-parent-info');
 }
 
-async function loadProvinces() {
-  try {
-    isLoading.value = true;
-    const response = await getProvinces({});
-    console.log('Raw API Response (Provinces):', JSON.stringify(response, null, 2));
-    provinceOptions.value = Array.isArray(response)
-      ? response.map(item => ({
-          name: item.name || item.province,
-          id: item.id
-        }))
-      : [
-          { name: 'Bagmati', id: 1 },
-          { name: 'Gandaki', id: 2 },
-          { name: 'Lumbini', id: 3 }
-        ];
-    console.log('provinceOptions after mapping:', provinceOptions.value);
-  } catch (error) {
-    console.error('Error loading provinces:', error);
-    provinceOptions.value = [
-      { name: 'Bagmati', id: 1 },
-      { name: 'Gandaki', id: 2 },
-      { name: 'Lumbini', id: 3 }
-    ];
-    toast.add({
-      severity: 'warn',
-      summary: 'Warning',
-      detail: 'Failed to load provinces. Using default options.',
-      life: 3000
-    });
-  } finally {
-    isLoading.value = false;
-  }
-}
+// ─── onMounted: grab store, load provinces, initialize dropdowns ─────────────
+onMounted(async () => {
+  initializeForm();
+  await loadProvinces();
 
-async function loadDistricts(provinceName, section) {
-  try {
-    isLoading.value = true;
-    const province = provinceOptions.value.find(p => p.name === provinceName);
-    if (!province || !province.id) {
-      throw new Error('Province ID not found');
-    }
-    const response = await getDistrict(province.id);
-    console.log('Raw API Response (Districts):', JSON.stringify(response, null, 2));
-    districtOptions[section] = Array.isArray(response)
-      ? response.map(item => ({
-          name: item.district,
-          id: item.id
-        }))
-      : [];
-    if (districtOptions[section].length === 0) {
-      toast.add({
-        severity: 'warn',
-        summary: 'Warning',
-        detail: 'No districts available for the selected province.',
-        life: 3000
-      });
-    }
-    // Sync temporary options if sameAsPermanent
-    if (section === 'permanent' && sameAsPermanentComputed.value) {
-      districtOptions.temporary = [...districtOptions.permanent];
-      kycStore.copyPermanentToTemporary();
-    }
-  } catch (error) {
-    console.error(`Error loading districts for ${provinceName}:`, error);
-    districtOptions[section] = [];
-    toast.add({
-      severity: 'warn',
-      summary: 'Warning',
-      detail: 'Failed to load districts. Please try again.',
-      life: 3000
-    });
-  } finally {
-    isLoading.value = false;
+  // If store already had a province → load its districts & local bodies:
+  if (form.permanent.province) {
+    await loadDistricts(form.permanent.province, 'permanent');
   }
-}
-
-async function loadLocalLevels(districtName, section) {
-  try {
-    isLoading.value = true;
-    const district = districtOptions[section].find(d => d.name === districtName);
-    if (!district || !district.id) {
-      throw new Error('District ID not found');
-    }
-    const response = await getLocalLevel(district.id);
-    console.log('Raw API Response (Local Levels):', JSON.stringify(response, null, 2));
-    localBodyOptions[section] = Array.isArray(response)
-      ? response.map(item => ({ name: item.localLevel }))
-      : [];
-    if (localBodyOptions[section].length === 0) {
-      toast.add({
-        severity: 'warn',
-        summary: 'Warning',
-        detail: 'No local bodies available for the selected district.',
-        life: 3000
-      });
-    }
-    // Sync temporary options if sameAsPermanent
-    if (section === 'permanent' && sameAsPermanentComputed.value) {
-      localBodyOptions.temporary = [...localBodyOptions.permanent];
-      kycStore.copyPermanentToTemporary();
-    }
-  } catch (error) {
-    console.error(`Error loading local levels for ${districtName}:`, error);
-    localBodyOptions[section] = [];
-    toast.add({
-      severity: 'warn',
-      summary: 'Warning',
-      detail: 'Failed to load local bodies. Please try again.',
-      life: 3000
-    });
-  } finally {
-    isLoading.value = false;
+  if (form.permanent.district) {
+    await loadLocalLevels(form.permanent.district, 'permanent');
   }
-}
 
-onMounted(() => {
-  loadProvinces();
+  if (!sameAsPermanentComputed.value && form.temporary.province) {
+    await loadDistricts(form.temporary.province, 'temporary');
+  }
+  if (!sameAsPermanentComputed.value && form.temporary.district) {
+    await loadLocalLevels(form.temporary.district, 'temporary');
+  }
 });
 </script>
