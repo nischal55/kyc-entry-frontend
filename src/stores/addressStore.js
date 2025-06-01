@@ -1,18 +1,8 @@
+// src/stores/addressStore.js
 import { defineStore } from 'pinia'
 
-export const useKycFormStore = defineStore('kycForm', {
+export const useAddressStore = defineStore('addressStore', {
     state: () => ({
-        form: {
-            salutation: null,
-            firstName: '',
-            middleName: '',
-            lastName: '',
-            dob: null,
-            gender: null,
-            mobile: null,
-            phone: null,
-            email: '',
-        },
         address: {
             permanent: {
                 country: '',
@@ -36,27 +26,17 @@ export const useKycFormStore = defineStore('kycForm', {
         },
     }),
     actions: {
-        updateForm(data) {
-            this.form = { ...this.form, ...data }
+        updatePermanentAddress(data) {
+            this.address.permanent = { ...this.address.permanent, ...data }
         },
-        resetForm() {
-            this.form = {
-                salutation: null,
-                firstName: '',
-                middleName: '',
-                lastName: '',
-                dob: null,
-                gender: null,
-                mobile: null,
-                phone: null,
-                email: '',
-            }
+        updateTemporaryAddress(data) {
+            this.address.temporary = { ...this.address.temporary, ...data }
         },
         copyPermanentToTemporary() {
             this.address.temporary = { ...this.address.permanent }
             this.address.sameAsPermanent = true
-            },
-            clearTemporary() {
+        },
+        clearTemporary() {
             this.address.temporary = {
                 country: '',
                 province: '',
@@ -67,6 +47,6 @@ export const useKycFormStore = defineStore('kycForm', {
                 houseNo: null,
             }
             this.address.sameAsPermanent = false
-            }
         }
+    }
 })
