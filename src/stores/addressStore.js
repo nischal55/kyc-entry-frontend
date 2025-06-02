@@ -3,12 +3,11 @@ import { defineStore } from 'pinia';
 export const useAddressStore = defineStore('address', {
   state: () => ({
     address: {
-      sameAsPermanent: false,
       permanent: {
-        country: null,  // will store entire country object
-        province: null, // will store entire province object
-        district: null, // will store entire district object
-        localBody: null, // will store entire localBody object
+        country: null,  
+        province: null, 
+        district: null, 
+        localBody: null, 
         wardNo: null,
         tole: '',
         houseNo: null

@@ -125,6 +125,7 @@
   </div>
 </template>
 
+
 <script setup>
 import { ref } from 'vue';
 import FileUpload from 'primevue/fileupload';
@@ -156,12 +157,77 @@ const files = ref({
   ppPhoto: null,
 });
 
+// Relation type mapping
+const relationTypes = [
+  { id: 1, relation: "GrandMother" },
+  { id: 2, relation: "Father" },
+  { id: 3, relation: "Mother" },
+  { id: 4, relation: "GrandFather" },
+  { id: 5, relation: "Spouse" },
+  { id: 6, relation: "FatherInLaw" }
+];
+
 const onFileSelect = (event, key) => {
   files.value[key] = event.files[0];
   documentStore.setFileName(key, event.files[0].name);
 };
 
+const transformFamilyData = (familyData) => {
+  const transformed = [];
+  
+  if (familyData.grandMotherName) {
+    transformed.push({
+      id: 1, // Or generate unique ID
+      fullName: familyData.grandMotherName,
+      relationType: relationTypes.find(r => r.id === 1)
+    });
+  }
+  
+  if (familyData.fatherName) {
+    transformed.push({
+      id: 2,
+      fullName: familyData.fatherName,
+      relationType: relationTypes.find(r => r.id === 2)
+    });
+  }
+  
+  if (familyData.motherName) {
+    transformed.push({
+      id: 3,
+      fullName: familyData.motherName,
+      relationType: relationTypes.find(r => r.id === 3)
+    });
+  }
+  
+  if (familyData.grandFatherName) {
+    transformed.push({
+      id: 4,
+      fullName: familyData.grandFatherName,
+      relationType: relationTypes.find(r => r.id === 4)
+    });
+  }
+  
+  if (familyData.spouseName) {
+    transformed.push({
+      id: 5,
+      fullName: familyData.spouseName,
+      relationType: relationTypes.find(r => r.id === 5)
+    });
+  }
+  
+  if (familyData.fatherInLawName) {
+    transformed.push({
+      id: 6,
+      fullName: familyData.fatherInLawName,
+      relationType: relationTypes.find(r => r.id === 6)
+    });
+  }
+  
+  return transformed;
+};
+
 const submitForm = () => {
+  // Validate required documents
   if (!files.value.citizenshipFront) {
     toast.add({
       severity: 'warn',
@@ -180,11 +246,39 @@ const submitForm = () => {
     });
     return;
   }
+  if (!files.value.ppPhoto) {
+    toast.add({
+      severity: 'warn',
+      summary: 'Missing Document',
+      detail: 'PP size Photo is required',
+      life: 3000,
+    });
+    return;
+  }
 
+  // Transform address data
+  const addressData = [
+    {
+      ...addressStore.address.permanent,
+      addressType: 'Permanent'
+    }
+  ];
+
+  if (!addressStore.address.sameAsPermanent) {
+    addressData.push({
+      ...addressStore.address.temporary,
+      addressType: 'Temporary'
+    });
+  }
+
+  // Transform family data
+  const familyData = transformFamilyData(familyStore.form);
+
+  // Combine all form data
   const combinedData = {
     documents: documentStore.files,
-    address: addressStore.address,
-    family: familyStore.form,
+    address: addressData,
+    family: familyData,
     financial: financialStore.form,
     identity: identityStore.form,
     kyc: kycFormStore.form,
@@ -193,6 +287,7 @@ const submitForm = () => {
   console.log('=== Full Form Data (JSON) ===');
   console.log(JSON.stringify(combinedData, null, 2));
 
+  // Show success message
   toast.add({
     severity: 'success',
     summary: 'Submitted',
@@ -200,6 +295,7 @@ const submitForm = () => {
     life: 3000,
   });
 
-  // Add upload logic or API calls here if needed...
+  // Here you would typically send the data to an API
+  // await submitToApi(combinedData);
 };
 </script>
