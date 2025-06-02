@@ -1,52 +1,49 @@
-// src/stores/addressStore.js
-import { defineStore } from 'pinia'
+import { defineStore } from 'pinia';
 
-export const useAddressStore = defineStore('addressStore', {
-    state: () => ({
-        address: {
-            permanent: {
-                country: '',
-                province: '',
-                district: '',
-                localBody: '',
-                wardNo: null,
-                tole: '',
-                houseNo: null,
-            },
-            temporary: {
-                country: '',
-                province: '',
-                district: '',
-                localBody: '',
-                wardNo: null,
-                tole: '',
-                houseNo: null
-            },
-            sameAsPermanent: false
-        },
-    }),
-    actions: {
-        updatePermanentAddress(data) {
-            this.address.permanent = { ...this.address.permanent, ...data }
-        },
-        updateTemporaryAddress(data) {
-            this.address.temporary = { ...this.address.temporary, ...data }
-        },
-        copyPermanentToTemporary() {
-            this.address.temporary = { ...this.address.permanent }
-            this.address.sameAsPermanent = true
-        },
-        clearTemporary() {
-            this.address.temporary = {
-                country: '',
-                province: '',
-                district: '',
-                localBody: '',
-                wardNo: null,
-                tole: '',
-                houseNo: null,
-            }
-            this.address.sameAsPermanent = false
-        }
+export const useAddressStore = defineStore('address', {
+  state: () => ({
+    address: {
+      sameAsPermanent: false,
+      permanent: {
+        country: null,  // will store entire country object
+        province: null, // will store entire province object
+        district: null, // will store entire district object
+        localBody: null, // will store entire localBody object
+        wardNo: null,
+        tole: '',
+        houseNo: null
+      },
+      temporary: {
+        country: null,
+        province: null,
+        district: null,
+        localBody: null,
+        wardNo: null,
+        tole: '',
+        houseNo: null
+      }
     }
-})
+  }),
+  actions: {
+    setSameAsPermanent(value) {
+      this.address.sameAsPermanent = value;
+      if (value) {
+        // Copy the entire permanent address object to temporary
+        this.address.temporary = JSON.parse(JSON.stringify(this.address.permanent));
+      }
+    },
+    updatePermanentAddress(data) {
+      this.address.permanent = {
+        ...this.address.permanent,
+        ...data
+      };
+    },
+    updateTemporaryAddress(data) {
+      this.address.temporary = {
+        ...this.address.temporary,
+        ...data
+      };
+    }
+  },
+  persist: true // if you're using pinia-plugin-persistedstate
+});
