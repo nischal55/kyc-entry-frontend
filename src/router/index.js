@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useKycProgress } from '@/stores/kycProgress' // ⬅️ Import your Pinia store
 import AddressInfo from '@/pages/AddressInfo.vue'
 import Declaration from '@/pages/Declaration.vue'
 import MemberInfo from '@/pages/MemberInfo.vue'
@@ -54,6 +55,26 @@ const routes = [
 const router = createRouter({
     history: createWebHistory(),
     routes,
+})
+
+// Global navigation guard
+router.beforeEach((to, from, next) => {
+    const store = useKycProgress()
+
+    const routeBlockRules = {
+        'kyc-address-info': !store.memberInfoCompleted,
+        'kyc-parent-info': !store.addressInfoCompleted,
+        'kyc-financial-info': !store.familyInfoCompleted,
+        'kyc-identity-info': !store.financialInfoCompleted,
+        'kyc-declaration-info': !store.financialInfoCompleted,
+    }
+
+    if (routeBlockRules[to.name]) {
+        alert('⚠️ Please complete the required previous section before accessing this page.')
+        next(false)
+    } else {
+        next()
+    }
 })
 
 export default router

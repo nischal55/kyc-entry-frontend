@@ -272,11 +272,15 @@ import { useToast } from 'primevue/usetoast';
 import { useRouter } from 'vue-router';
 import { useAddressStore } from '@/stores/addressStore';
 import { getProvinces, getDistrict, getLocalLevel } from '@/services/apiService';
+import { useKycProgress } from '@/stores/kycProgress';
 
 const toast = useToast();
 const router = useRouter();
 const kycStore = useAddressStore();
 const isLoading = ref(false);
+const store = useKycProgress()
+
+
 
 // ─── Reactive form data ─────────────────────────────────────────────────────
 const form = reactive({
@@ -670,7 +674,7 @@ async function submitForm() {
     };
     kycStore.updateTemporaryAddress(temporaryData);
   }
-
+store.addressInfoCompleted = true
   toast.add({
     severity: 'success',
     summary: 'Form Submitted',

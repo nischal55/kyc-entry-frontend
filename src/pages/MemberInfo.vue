@@ -99,9 +99,12 @@ import Button from 'primevue/button';
 import { useRouter } from 'vue-router';
 import { useKycFormStore } from '@/stores/kycForm';
 import { toRaw } from 'vue';
+import { useKycProgress } from '@/stores/kycProgress';
 
 const router = useRouter();
 const kycStore = useKycFormStore();
+const store = useKycProgress()
+
 
 const form = computed({
     get: () => kycStore.form,
@@ -159,6 +162,7 @@ const submitForm = () => {
 
     if (hasError) return;
 
+    store.memberInfoCompleted = true
     const customer_data = toRaw(f);
     kycStore.updateForm(customer_data);
     router.push('/kyc-address-info');

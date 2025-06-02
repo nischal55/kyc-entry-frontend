@@ -75,9 +75,11 @@ import Button from 'primevue/button';
 import { useFinancialStore } from '@/stores/financialStore';
 import { useRouter } from 'vue-router';
 import { toRaw } from 'vue'
+import { useKycProgress } from '@/stores/kycProgress';
 
 const financialStore = useFinancialStore();
 const router = useRouter()
+const store = useKycProgress()
 
 const form = computed({
     get: () => financialStore.form,
@@ -143,6 +145,7 @@ const submitForm = () => {
 
     if (hasError) return;
 
+    store.financialInfoCompleted=true
     const financialData = toRaw(form.value);
     financialStore.updateForm(financialData);
     router.push('/kyc-identity-info');

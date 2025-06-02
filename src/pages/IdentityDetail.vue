@@ -86,8 +86,10 @@ import InputNumber from 'primevue/inputnumber';
 import Dropdown from 'primevue/dropdown';
 import Button from 'primevue/button';
 import { useIdentityStore } from '@/stores/identityStore';
+import { useKycProgress } from '@/stores/kycProgress';
 
 const router = useRouter();
+const store = useKycProgress()
 const identityStore = useIdentityStore();
 
 const form = computed({
@@ -152,6 +154,7 @@ const submitForm = () => {
         identityType: form.value.identityType, // already string due to optionValue
     };
 
+    store.financialInfoCompleted=true
     identityStore.updateForm(identityData);
     router.push('/kyc-declaration-info');
 

@@ -82,9 +82,12 @@ import Button from 'primevue/button';
 import { useFamilyStore } from '@/stores/family';
 import { toRaw } from 'vue';
 import { useRouter } from 'vue-router';
+import { useKycProgress } from '@/stores/kycProgress';
 
 const familyStore = useFamilyStore();
+const store = useKycProgress();
 const router = useRouter();
+
 
 const form = computed({
     get: () => familyStore.form,
@@ -155,7 +158,7 @@ const submitForm = () => {
     }
 
     if (hasError) return;
-
+store.familyInfoCompleted = true
     const familyData = toRaw(form.value);
     familyStore.updateForm(familyData);
     router.push('/kyc-financial-info');
