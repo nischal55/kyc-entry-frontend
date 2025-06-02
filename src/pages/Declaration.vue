@@ -177,7 +177,7 @@ const transformFamilyData = (familyData) => {
   
   if (familyData.grandMotherName) {
     transformed.push({
-      id: 1, // Or generate unique ID
+      id: 1,
       fullName: familyData.grandMotherName,
       relationType: relationTypes.find(r => r.id === 1)
     });
@@ -220,6 +220,47 @@ const transformFamilyData = (familyData) => {
       id: 6,
       fullName: familyData.fatherInLawName,
       relationType: relationTypes.find(r => r.id === 6)
+    });
+  }
+  
+  return transformed;
+};
+
+const transformDocumentsData = (documents) => {
+  const transformed = [];
+  
+  // Add citizenship front if exists
+  if (documents.citizenshipFront) {
+    transformed.push({
+      documentUrl: documents.citizenshipFront
+    });
+  }
+  
+  // Add citizenship back if exists
+  if (documents.citizenshipBack) {
+    transformed.push({
+      documentUrl: documents.citizenshipBack
+    });
+  }
+  
+  // Add passport if exists and not empty
+  if (documents.passport) {
+    transformed.push({
+      documentUrl: documents.passport
+    });
+  }
+  
+  // Add national ID if exists and not empty
+  if (documents.nationalID) {
+    transformed.push({
+      documentUrl: documents.nationalID
+    });
+  }
+  
+  // Add PP photo if exists
+  if (documents.ppPhoto) {
+    transformed.push({
+      documentUrl: documents.ppPhoto
     });
   }
   
@@ -274,9 +315,12 @@ const submitForm = () => {
   // Transform family data
   const familyData = transformFamilyData(familyStore.form);
 
+  // Transform documents data
+  const documentsData = transformDocumentsData(documentStore.files);
+
   // Combine all form data
   const combinedData = {
-    documents: documentStore.files,
+    documents: documentsData,
     address: addressData,
     family: familyData,
     financial: financialStore.form,
