@@ -7,8 +7,12 @@
                     <div>
                         <label>Salutation</label><br />
                         <Dropdown class="w-full border border-slate-200 rounded-md h-10"
-                            :class="{ 'border-red-500': errors.salutation }" v-model="form.salutation"
-                            :options="salutationOptions" optionLabel="name" placeholder="Select Salutation" />
+                            :class="{ 'border-red-500': errors.salutation }"
+                            v-model="form.salutation"
+                            :options="salutationOptions"
+                            optionLabel="name"
+                            optionValue="name"
+                            placeholder="Select Salutation" />
                         <small v-if="errors.salutation" class="text-red-500">Salutation is required.</small>
                     </div>
 
@@ -46,8 +50,12 @@
                     <div>
                         <label>Gender</label><br />
                         <Dropdown class="w-full border border-slate-200 rounded-md h-10"
-                            :class="{ 'border-red-500': errors.gender }" v-model="form.gender" :options="genderOptions"
-                            optionLabel="name" placeholder="Select Gender" />
+                            :class="{ 'border-red-500': errors.gender }"
+                            v-model="form.gender"
+                            :options="genderOptions"
+                            optionLabel="name"
+                            optionValue="name"
+                            placeholder="Select Gender" />
                         <small v-if="errors.gender" class="text-red-500">Gender is required.</small>
                     </div>
 
@@ -71,9 +79,8 @@
                             :class="{ 'border-red-500': errors.email }" type="email" v-model="form.email" />
                         <small v-if="errors.email" class="text-red-500">Enter a valid email address.</small>
                     </div>
-
-
                 </div>
+
                 <div>
                     <Button label="Next" class="w-full lg:w-40" @click="submitForm" />
                 </div>
@@ -91,12 +98,10 @@ import Dropdown from 'primevue/dropdown';
 import Button from 'primevue/button';
 import { useRouter } from 'vue-router';
 import { useKycFormStore } from '@/stores/kycForm';
-import { toRaw } from 'vue'
+import { toRaw } from 'vue';
 
-
-const router = useRouter()
+const router = useRouter();
 const kycStore = useKycFormStore();
-
 
 const form = computed({
     get: () => kycStore.form,
@@ -119,12 +124,6 @@ const salutationOptions = ref([
     { name: 'Mr' },
     { name: 'Mrs' },
     { name: 'Miss' },
-]);
-
-const identityOptions = ref([
-    { name: 'Citizenship' },
-    { name: 'Passport' },
-    { name: 'Election Card' },
 ]);
 
 const genderOptions = ref([
@@ -159,8 +158,9 @@ const submitForm = () => {
     if (!f.email || !isValidEmail(f.email)) errors.value.email = hasError = true;
 
     if (hasError) return;
-    const customer_data = toRaw(f)
-    kycStore.updateForm(customer_data)
-    router.push('/kyc-address-info')
+
+    const customer_data = toRaw(f);
+    kycStore.updateForm(customer_data);
+    router.push('/kyc-address-info');
 };
 </script>
