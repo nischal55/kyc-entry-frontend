@@ -6,45 +6,67 @@
                 <div class="grid grid-cols-2 gap-5 py-10">
                     <div>
                         <label>Identity Type</label><br />
-                        <Dropdown class="w-full border border-slate-200 rounded-md h-10"
-                            :class="{ 'border-red-500': errors.identityType }" v-model="form.identityType"
-                            :options="salutationOptions" optionLabel="name" placeholder="Select Identity Type" />
+                        <Dropdown
+                            class="w-full border border-slate-200 rounded-md h-10"
+                            :class="{ 'border-red-500': errors.identityType }"
+                            v-model="form.identityType"
+                            :options="salutationOptions"
+                            optionLabel="name"
+                            :optionValue="option => option.name"
+                            placeholder="Select Identity Type"
+                        />
                         <small v-if="errors.identityType" class="text-red-500">Identity type is required.</small>
                     </div>
                     <div>
                         <label>Identity Number</label><br />
-                        <InputNumber class="w-full border border-slate-200 rounded-md h-10"
-                            :class="{ 'border-red-500': errors.identityNumber }" v-model="form.identityNumber"
-                            :useGrouping="false" />
-                        <small v-if="errors.identityNumber" class="text-red-500">Identity number must be 10
-                            digits.</small>
+                        <InputNumber
+                            class="w-full border border-slate-200 rounded-md h-10"
+                            :class="{ 'border-red-500': errors.identityNumber }"
+                            v-model="form.identityNumber"
+                            :useGrouping="false"
+                        />
+                        <small v-if="errors.identityNumber" class="text-red-500">
+                            Identity number is required.
+                        </small>
                     </div>
                     <div>
                         <label>Authority</label><br />
-                        <InputText class="w-full border rounded-md h-10" :class="{ 'border-red-500': errors.authority }"
+                        <InputText
+                            class="w-full border rounded-md h-10"
+                            :class="{ 'border-red-500': errors.authority }"
                             v-model="form.authority"
-                            @input="e => form.authority = e.target.value.replace(/[^a-zA-Z ]/g, '')" />
+                            @input="e => form.authority = e.target.value.replace(/[^a-zA-Z ]/g, '')"
+                        />
                         <small v-if="errors.authority" class="text-red-500">Please enter a valid authority name.</small>
                     </div>
                     <div>
                         <label>Place of Issue</label><br />
-                        <InputText class="w-full border rounded-md h-10"
-                            :class="{ 'border-red-500': errors.placeOfIssue }" v-model="form.placeOfIssue"
-                            @input="e => form.placeOfIssue = e.target.value.replace(/[^a-zA-Z ]/g, '')" />
+                        <InputText
+                            class="w-full border rounded-md h-10"
+                            :class="{ 'border-red-500': errors.placeOfIssue }"
+                            v-model="form.placeOfIssue"
+                            @input="e => form.placeOfIssue = e.target.value.replace(/[^a-zA-Z ]/g, '')"
+                        />
                         <small v-if="errors.placeOfIssue" class="text-red-500">Please enter a valid place.</small>
                     </div>
                     <div>
                         <label>Nationality</label><br />
-                        <InputText class="w-full border rounded-md h-10"
-                            :class="{ 'border-red-500': errors.nationality }" v-model="form.nationality"
-                            @input="e => form.nationality = e.target.value.replace(/[^a-zA-Z ]/g, '')" />
+                        <InputText
+                            class="w-full border rounded-md h-10"
+                            :class="{ 'border-red-500': errors.nationality }"
+                            v-model="form.nationality"
+                            @input="e => form.nationality = e.target.value.replace(/[^a-zA-Z ]/g, '')"
+                        />
                         <small v-if="errors.nationality" class="text-red-500">Please enter a valid nationality.</small>
                     </div>
                     <div>
                         <label>Birth Place</label><br />
-                        <InputText class="w-full border rounded-md h-10"
-                            :class="{ 'border-red-500': errors.birthPlace }" v-model="form.birthPlace"
-                            @input="e => form.birthPlace = e.target.value.replace(/[^a-zA-Z ]/g, '')" />
+                        <InputText
+                            class="w-full border rounded-md h-10"
+                            :class="{ 'border-red-500': errors.birthPlace }"
+                            v-model="form.birthPlace"
+                            @input="e => form.birthPlace = e.target.value.replace(/[^a-zA-Z ]/g, '')"
+                        />
                         <small v-if="errors.birthPlace" class="text-red-500">Please enter a valid birth place.</small>
                     </div>
                 </div>
@@ -55,7 +77,6 @@
         </div>
     </div>
 </template>
-
 
 <script setup>
 import { ref, computed, toRaw } from 'vue';
@@ -100,10 +121,9 @@ const resetErrors = () => {
 
 const submitForm = () => {
     resetErrors();
-
     let hasError = false;
 
-    // Required alphabetic fields
+    // Alphabetic field validation
     const requiredTextFields = ['authority', 'placeOfIssue', 'nationality', 'birthPlace'];
     requiredTextFields.forEach(field => {
         if (!form.value[field] || !isAlphabetic(form.value[field])) {
@@ -112,13 +132,13 @@ const submitForm = () => {
         }
     });
 
-    // Identity Type
+    // Identity Type validation
     if (!form.value.identityType) {
         errors.value.identityType = true;
         hasError = true;
     }
 
-    // Identity Number (just required now, no length check)
+    // Identity Number validation
     if (!form.value.identityNumber) {
         errors.value.identityNumber = true;
         hasError = true;
@@ -126,7 +146,12 @@ const submitForm = () => {
 
     if (hasError) return;
 
-    const identityData = toRaw(form.value);
+    // Only store identityType name
+    const identityData = {
+        ...toRaw(form.value),
+        identityType: form.value.identityType, // already string due to optionValue
+    };
+
     identityStore.updateForm(identityData);
     router.push('/kyc-declaration-info');
 
